@@ -86,7 +86,7 @@ class Test(App):
     buttonlist = []
 
     def build(self):  
-        self.title = 'Kivy Data'
+        self.title = 'Kivy BIG Data'
         self.screen=Builder.load_string(KV)
         return self.screen
 
