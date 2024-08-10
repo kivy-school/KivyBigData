@@ -136,17 +136,24 @@ class Test(App):
         boxcount = range(len(self.newset))
         cellcount = range(len(self.newset[0].cells)) # assumes all boxes have same cellcount
         boxcount_MAX = len(self.newset)
-        #boxInt, cellInt don't mean anything anymore as they got switched to force updates to work
         for boxInt, cellInt in itertools.product(cellcount, boxcount):
            
-            correct_index = boxcount_MAX*boxInt+cellInt
+            correct_index = boxcount_MAX*cellInt+boxInt
+            
+            # button = Button(
+            #     text=f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}', 
+            #     font_size="10")
             button = Button(
-                text=f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}', 
-                
+                # text=f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}', 
                 font_size="10")
             button.bind(text=self.get_text_from_data)
             button.bind(on_release=self.get_text_from_data)
             button.coords = (boxInt, cellInt)
+            
+            # print("?crer", correct_index)
+            # button = Button(
+            #     text=f'b{str(self.current_data[correct_index])} ', 
+            #     font_size="10")
             datagridref = app.get_running_app().root.ids['bot_datagrid']
             datagridref.add_widget(button)
 

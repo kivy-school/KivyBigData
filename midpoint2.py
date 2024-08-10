@@ -109,7 +109,7 @@ def Sample_set():
 # for cell in b1.cells:
 #         print(f'{b1.box_num}\t\t{cell.cell_num}\t\t{cell.value}')
 class Test(App):
-    current_data = ListProperty([]) #updating this property forces changes 
+    current_data = ListProperty() #updating this property forces changes 
 
     def build(self):  
         self.title = 'Kivy Data'
@@ -136,30 +136,29 @@ class Test(App):
         boxcount = range(len(self.newset))
         cellcount = range(len(self.newset[0].cells)) # assumes all boxes have same cellcount
         boxcount_MAX = len(self.newset)
-        #boxInt, cellInt don't mean anything anymore as they got switched to force updates to work
-        for boxInt, cellInt in itertools.product(cellcount, boxcount):
-           
-            correct_index = boxcount_MAX*boxInt+cellInt
+        for boxInt, cellInt in itertools.product(boxcount, cellcount):
+            #there is probably a smart way but right now figure out injection between datalist and gridlayout
+            #this is because orientation of datalist is columns going down while kivy orientation of gridlayout is rows going to right
+            correct_index = boxcount_MAX*cellInt+boxInt
+            
+            # button = Button(
+            #     text=f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}', 
+            #     font_size="10")
             button = Button(
-                text=f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}', 
-                
+                # text=f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}', 
                 font_size="10")
             button.bind(text=self.get_text_from_data)
             button.bind(on_release=self.get_text_from_data)
-            button.coords = (boxInt, cellInt)
+            
+            # print("?crer", correct_index)
+            # button = Button(
+            #     text=f'b{str(self.current_data[correct_index])} ', 
+            #     font_size="10")
             datagridref = app.get_running_app().root.ids['bot_datagrid']
             datagridref.add_widget(button)
 
     def get_text_from_data(self, *args):
-        print("get text ???", self, args)
-        widget = args[0]
-        boxInt = widget.coords[1]
-        cellInt = widget.coords[0]
-        boxcount_MAX = len(self.newset)
-        correct_index = boxcount_MAX*cellInt+boxInt
-        # widget.text = f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}'
-        print("wtf", len(self.current_data), correct_index)
-        widget.text = f'{str(self.current_data[correct_index])} \n  {boxInt} \n  {cellInt} '
+        print("zargs?", args)
 
 
     def updateGraph(self, *args):
@@ -193,26 +192,12 @@ class Test(App):
         boxcount = range(len(self.newset))
         cellcount = range(len(self.newset[0].cells)) # assumes all boxes have same cellcount
         #use itertools b/c it might be faster than 2 for loops
-        # for boxInt, cellInt in itertools.product(boxcount, cellcount):
-        #     box_num = self.newset[boxInt].box_num
-        #     cell_num = self.newset[boxInt].cells[cellInt].cell_num
-        #     cell_val = self.newset[boxInt].cells[cellInt].value
-        #     # print(f'{box_num}\t\t{cell_num}\t\t{cell_val}')
-        #     new_data.append([box_num, cell_num, cell_val])
-
-        #there is probably a smart way but right now figure out injection between datalist and gridlayout
-        #this is because orientation of datalist is columns going down while kivy orientation of gridlayout is rows going to right
-
-        for cellInt in cellcount:
-            for boxInt in boxcount:
-                box_num = self.newset[boxInt].box_num
-                cell_num = self.newset[boxInt].cells[cellInt].cell_num
-                cell_val = self.newset[boxInt].cells[cellInt].value
-                new_data.append([box_num, cell_num, cell_val])
-                print(f'{box_num}\t\t{cell_num}\t\t{cell_val}')
-        print("boxintmax", boxInt)
-        print("cellintmax", cellInt)
-        # breakpoint()
+        for boxInt, cellInt in itertools.product(boxcount, cellcount):
+            box_num = self.newset[boxInt].box_num
+            cell_num = self.newset[boxInt].cells[cellInt].cell_num
+            cell_val = self.newset[boxInt].cells[cellInt].value
+            print(f'{box_num}\t\t{cell_num}\t\t{cell_val}')
+            new_data.append([box_num, cell_num, cell_val])
         
         #trick is to update the listproperty all at once so that only one event gets dispatched
         self.current_data = new_data
