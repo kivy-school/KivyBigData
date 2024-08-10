@@ -26,6 +26,25 @@ Screen
         MatplotFigure:
             id: figure_wgt
             size_hint: (1, 0.3)
+        # BoxLayout:
+        #     id: homeBL
+        #     size_hint_y:0.2
+        #     Button:
+        #         text:"home"
+        #         on_release:app.home()
+        #     ToggleButton:
+        #         group:'touch_mode'
+        #         state:'down'
+        #         text:"pan" 
+        #         on_release:
+        #             app.set_touch_mode('pan')
+        #             self.state='down'
+        #     ToggleButton:
+        #         group:'touch_mode'
+        #         text:"zoom box"  
+        #         on_release:
+        #             app.set_touch_mode('zoombox')
+        #             self.state='down'                
         BoxLayout:
             size_hint: (1, 0.1)
             id: topBL
@@ -81,6 +100,15 @@ def Sample_set():
         Ans.append(SamplerBox(i))
     return Ans
 
+# all_boxes = Sample_set()
+# print("ss type", type(all_boxes))
+# print("ss type2", all_boxes)
+# print("ss type3", len(all_boxes))
+# print("PRINT ONLY CELLS IN 1st SamplerBox", )
+# b1 = all_boxes[0]
+# for cell in b1.cells:
+#         print(f'{b1.box_num}\t\t{cell.cell_num}\t\t{cell.value}')
+
 class Test(App): 
     current_data = ListProperty([]) #updating this property forces changes 
     buttonlist = []
@@ -96,14 +124,17 @@ class Test(App):
         
         self.screen.figure_wgt.figure = self.mygraph.fig
         self.updateGraph() #init data
-        
         #update the graph with a shitty graphgen
         Clock.schedule_interval(self.updateGraph, 1)
         for i in range(20,0,-1): # should be cols
             button = Button(text=f'B{i}', font_size="12")
             datagridref = app.get_running_app().root.ids['top_datagrid']
             datagridref.add_widget(button)
-
+        # for i in range(240): # should be rows*cols
+        #     # button = Button(text=f'{i + 1}')
+        #     button = Button(text=f'{i + 1} \n{i+1}', font_size="10")
+        #     datagridref = app.get_running_app().root.ids['bot_datagrid']
+        #     datagridref.add_widget(button)
         boxcount = range(len(self.newset))
         cellcount = range(len(self.newset[0].cells)) # assumes all boxes have same cellcount
         boxcount_MAX = len(self.newset)
@@ -125,10 +156,26 @@ class Test(App):
                 # padding_y= [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
                 font_size="12")
             self.buttonlist.append(button)
+            # button.bind(text=self.get_text_from_data)
+            # self.bind(current_data=callback)
+            # button.bind(on_release=self.get_text_from_data)
             button.coords = (boxInt, cellInt)
             datagridref = app.get_running_app().root.ids['bot_datagrid']
             datagridref.add_widget(button)
 
+    def get_text_from_data(self, *args):
+        print("get text ???", self, args)
+        if len(args) == 1:
+            widget = args[0]
+        elif len(args) > 1:
+            widget = args[1]
+        boxInt = widget.coords[1]
+        cellInt = widget.coords[0]
+        boxcount_MAX = len(self.newset)
+        correct_index = boxcount_MAX*cellInt+boxInt
+        # widget.text = f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}'
+        print("what", len(self.current_data), correct_index)
+        # widget.text = f'{str(self.current_data[correct_index])} \n  {boxInt} \n  {cellInt} '
     def update_text_from_data(self, *args):
         print("get text ???", self, args)
         if len(args) == 1:
@@ -155,21 +202,37 @@ class Test(App):
 
         self.mygraph.line1 = self.mygraph.ax1.plot(np.random.randn(nb_pts),label='line1')
         self.mygraph.line2 = self.mygraph.ax1.plot(np.random.randn(nb_pts)+2,label='line2') 
+        # app.get_running_app().root.ids['figure_wgt'].update()
+        #make it enabled so it updates
+        # app.get_running_app().root.ids['figure_wgt'].diabled = False 
+        # app.get_running_app().root.ids['figure_wgt'].background = None
+        # app.get_running_app().root.ids['figure_wgt']._pressed = True
         app.get_running_app().root.ids['figure_wgt'].home()
-        
-       
+        # app.get_running_app().root.ids['figure_wgt'].axes.figure.canvas.draw_idle()
+        # app.get_running_app().root.ids['figure_wgt'].axes.figure.canvas.flush_events()
+        # app.get_running_app().root.ids['figure_wgt']._update_view()
+        # app.get_running_app().root.ids['figure_wgt']._pressed = False
         print("updated graph")
         self.newset = Sample_set()
+
+        # for box in self.newset:
+        #     for cell in box.cells:
+        #         print(f'{box.box_num}\t\t{cell.cell_num}\t\t{cell.value}')
 
         new_data = []
         boxcount = range(len(self.newset))
         cellcount = range(len(self.newset[0].cells)) # assumes all boxes have same cellcount
-        
+        #use itertools b/c it might be faster than 2 for loops
+        # for boxInt, cellInt in itertools.product(boxcount, cellcount):
+        #     box_num = self.newset[boxInt].box_num
+        #     cell_num = self.newset[boxInt].cells[cellInt].cell_num
+        #     cell_val = self.newset[boxInt].cells[cellInt].value
+        #     # print(f'{box_num}\t\t{cell_num}\t\t{cell_val}')
+        #     new_data.append([box_num, cell_num, cell_val])
 
         #there is probably a smart way but right now figure out injection between datalist and gridlayout
         #this is because orientation of datalist is columns going down while kivy orientation of gridlayout is rows going to right
 
-        #TODO: use itertools b/c it might be faster than 2 for loops
         for cellInt in cellcount:
             for boxInt in boxcount:
                 box_num = self.newset[boxInt].box_num
