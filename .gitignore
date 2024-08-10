@@ -1,0 +1,8 @@
+build
+dist
+.DS_Store
+ignorethis
+.cache
+.venv
+poetry.lock
+__pycache__
