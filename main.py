@@ -1,10 +1,12 @@
-from kivy.utils import platform
 
+from kivy.utils import platform
 #avoid conflict between mouse provider and touch (very important with touch device)
 #no need for android platform
 if platform != 'android':
     from kivy.config import Config
     Config.set('input', 'mouse', 'mouse,disable_on_activity')
+# from kivy.config import Config
+# Config.set('modules', 'monitor', '')
 
 from kivy.lang import Builder
 # from kivy.app import App
@@ -16,13 +18,18 @@ import trio
 from kivy.lang import Builder
 
 from kivy_reloader.app import App
+from kivy.uix.label import Label
 
 KV = '''
+<CustomLabel@Label>:
 
-Screen
+Screen:
     figure_wgt:figure_wgt
     BoxLayout:
         orientation:'vertical'
+        CustomLabel:
+            text: self.fpscount
+            size_hint: (1,0.05)
         MatplotFigure:
             id: figure_wgt
             size_hint: (1, 0.3)
@@ -52,6 +59,16 @@ from kivy.uix.button import Button
 
 from random import randint
 import itertools
+
+from kivy.properties import StringProperty
+
+class CustomLabel(Label):
+    fpscount = StringProperty('0')
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        Clock.schedule_interval(self.startcount, 1/60)
+    def startcount(self, *args):
+        self.fpscount = str(Clock.get_fps())
 
 
 class Cell:
@@ -130,7 +147,7 @@ class Test(App):
             datagridref.add_widget(button)
 
     def update_text_from_data(self, *args):
-        print("get text ???", self, args)
+        # print("get text ???", self, args)
         if len(args) == 1:
             widget = args[0]
         elif len(args) > 1:
@@ -140,7 +157,7 @@ class Test(App):
         boxcount_MAX = len(self.newset)
         correct_index = boxcount_MAX*cellInt+boxInt
         # widget.text = f'b{self.current_data[correct_index][0]} \nc{self.current_data[correct_index][1]}'
-        print("wwhja", len(self.current_data), correct_index)
+        # print("wwhja", len(self.current_data), correct_index)
         # return f'{str(self.current_data[correct_index])} \n  {boxInt} \n  {cellInt} '
         # return f'{boxInt} \n{cellInt} \n {self.current_data[correct_index][2]}'
         return f'{self.current_data[correct_index][2]} \n{self.current_data[correct_index][1]}' 
